@@ -22,10 +22,10 @@ Color = imread('.\data\Teddy\Color.png');
 % Color = imread('.\data\synthetic\color3.png');
 
 %% Trim data if needed
-ColorSection = Color(151:250,231:260,:);
-DepthSection = Depth(151:250,231:260);  % rgb2gray if needed
-% ColorSection = Color;
-% DepthSection = Depth;  % rgb2gray if needed
+% ColorSection = Color(151:250,231:260,:);
+% DepthSection = Depth(151:250,231:260);  % rgb2gray if needed
+ColorSection = Color;
+DepthSection = Depth;  % rgb2gray if needed
 % for i = 1:150
 %     DepthSection(i,:) = i;
 % end
@@ -115,7 +115,7 @@ if(view_3d)
 end
 %% Choose models
 s = [struct('string','Bilateral Filter','run',false)
-     struct('string','Bilateral Upsampling','run',false)
+     struct('string','Bilateral Upsampling','run',true)
      struct('string','Noise-aware Filter','run',false)
      struct('string','Weight Mode Filter','run',false)
      struct('string','Anisotropic Diffusion','run',true)
