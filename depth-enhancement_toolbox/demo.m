@@ -14,18 +14,20 @@ clc;
 
 %% Read data
 
-Depth = imread('.\data\Teddy\GroundTruth.png');
+% Depth = imread('.\data\Teddy\GroundTruth.png');
+Depth = pfmread('.\data\IC\depth0.pfm');
 % Depth = imresize(Depth,1/2,'nearest');
-Color = imread('.\data\Teddy\Color.png');
+% Color = imread('.\data\Teddy\Color.png');
+Color = imread('.\data\IC\colorImg.bmp');
 % Color = imresize(Color,1/2,'nearest');
 % Depth = imread('.\data\synthetic\depth3.png');
 % Color = imread('.\data\synthetic\color3.png');
 
 %% Trim data if needed
-% ColorSection = Color(151:250,231:260,:);
-% DepthSection = Depth(151:250,231:260);  % rgb2gray if needed
-ColorSection = Color;
-DepthSection = Depth;  % rgb2gray if needed
+ColorSection = Color(766:1859, 1164:2562,:);
+DepthSection = Depth(766:1859, 1164:2562);  % rgb2gray if needed
+% ColorSection = Color;
+% DepthSection = Depth;  % rgb2gray if needed
 % for i = 1:150
 %     DepthSection(i,:) = i;
 % end
