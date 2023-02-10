@@ -21,6 +21,7 @@ clc;
 % Color = imread('.\data\Teddy\Color.png');
 Depth = pfmread('.\data\IC\depth0.pfm');
 Color = imread('.\data\IC\colorImg0.bmp');
+Confidence = pfmread('.\data\IC\depth0.pfm');
 % Color = imresize(Color,1/2,'nearest');
 % Depth = imread('.\data\synthetic\depth3.png');
 % Color = imread('.\data\synthetic\color3.png');
@@ -28,6 +29,7 @@ Color = imread('.\data\IC\colorImg0.bmp');
 %% Trim data if needed
 ColorSection = Color(766:2200, 1164:2562,:);
 DepthSection = Depth(766:2200, 1164:2562);  % rgb2gray if needed
+ConfidenceSection = Confidence(766:2200, 1164:2562);
 % ColorSection = Color;
 % DepthSection = Depth;  % rgb2gray if needed
 % for i = 1:150
@@ -96,9 +98,13 @@ LBF_depth_inteval = 50;          % Depth slice interal
 LBF_iterative_number = 3;
 
 % Fast Bilateral Solver
-
-
-
+FBS_sigma_luma = 4;
+FBS_sigma_chroma = 4;
+FBS_sigma_spatial = 8;
+FBS_lam = 128;
+FBS_A_diag_min = 1e-5;
+FBS_cg_tol = 1e-5;
+FBS_cg_maxiter = 25;
 %
 
 %% Generate the kinds of depth map
@@ -126,6 +132,7 @@ end
 %% Choose models
 s = [struct('string','Bilateral Filter','run',false)
      struct('string','Bilateral Upsampling','run',false)
+     struct('string','Bilateral Solver','run',false)
      struct('string','Noise-aware Filter','run',false)
      struct('string','Weight Mode Filter','run',true)
      struct('string','Anisotropic Diffusion','run',true)
@@ -168,6 +175,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   Fast Bilateral Solver       
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if(isequal(s(i).string,'Bilateral Solver') && s(i).run)
+	fprintf([s(i).string ' begin...\n'])
+    tic
+    grid = BilateralGrid(ColorSection, FBS_sigma_spatial,FBS_sigma_luma,FBS_sigma_chroma);
+    fbs_solver = BilateralSolver(grid);
+    output = fbs_solver.solve(DepthSection,ConfidenceSection);
+	fprintf([s(i).string ': total running time is %.5f s\n'],toc)
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   Anisotropic Diffusion         

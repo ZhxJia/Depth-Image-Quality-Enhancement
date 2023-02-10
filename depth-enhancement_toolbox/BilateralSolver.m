@@ -48,6 +48,27 @@ methods(Access = public)
         Dm = diag(m);
         Dn = diag(n);
     end
+    
+    function [xhat, obj] = solve(obj, x, w)
+        %check that w is a vector or a nx1 matrix
+        assert(size(w,2) == 1);
+        A_smooth = (obj.Dm - obj.Dn * obj.grid.blur(obj.Dn));
+        w_splat = obj.grid.splat(w);
+        A_data = diag(w_splat(:,1));
+        A = obj.lam * A_smooth + A_data;
+        xw = x * w;
+        b = obj.grid.splat(xw);
+        % Use simple Jacobi preconditioner
+%         A_diag = 
+        
+        % Flat initialization
+        y0 = obj.grid.splat(xw) / w_splat;
+        yhat = zeros(size(y0));
+        for d = 1 : size(x,end)
+            yhat(:,d) = pcg(A, b(:,d), obj.cg_tol, obj.cg_maxiter);
+        end
+        xhat = obj.grid.slice(yhat);
+    end
 end
 
 methods(Access = private)
