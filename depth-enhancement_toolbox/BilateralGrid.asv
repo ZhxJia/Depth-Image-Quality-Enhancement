@@ -1,4 +1,4 @@
-classdef BilateralGrid < handle
+classdef BilateralGrid
     
 properties(Access = public)
     npixels uint32;
@@ -59,8 +59,8 @@ methods(Access = public)
     
     function y = filter(obj, x)
         % Apply bilateral filter to an input x
-         y = obj.slice(obj.blur(obj.splat(x)))... 
-         / obj.slice(obj.blur(obj.splat(ones(size(x)))));
+         y = obj.slice(obj.blur(obj.splat(x))) 
+         / obj.slice(obj.blur(obj.splat()));
     end
 end
 

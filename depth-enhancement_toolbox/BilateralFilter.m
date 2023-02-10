@@ -13,6 +13,8 @@
 %   Liu Junyi, Zhejiang University
 %   Version 1: June 2012
 %   Version 2: May 2013
+%Ref:
+%   Petschnigg, G., et al. Digital photography with flash and no-flash image pairs. 2004.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function result = BilateralFilter(color,depth,sigma_w,sigma_c,w)
     if( size(color,3) ~= 3 ),

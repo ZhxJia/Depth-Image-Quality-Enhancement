@@ -10,6 +10,8 @@
 %   data_weight -   weight of the measurements
 %Code Author:
 %   Liu Junyi, Zhejiang University
+%Ref:
+%   Liu, J., Gong, X., Guided Depth enhancement via Anisotropic Diffusion, Pacific-rim Conference on multimedia, 2013.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function result = AnisotropicDiffusion(color,depth,sigma_w,data_weight)
     if( size(color,3) ~= 3 ),

@@ -14,6 +14,8 @@
 %   Liu Junyi, Zhejiang University
 %   Version 1: June 2012
 %   Version 2: May 2013
+%Ref:
+%   Min, D., J. Lu and M.N. Do, Depth video enhancement based on weighted mode filtering. TIP, 2012. 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function result = WeightedModeFilter(color,depth,sigma_w,sigma_c,w,sigma_d)
     if( size(color,3) ~= 3 ),

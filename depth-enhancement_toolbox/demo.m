@@ -6,6 +6,8 @@
 %   Liu Junyi, Zhejiang University
 %   version 1: June 2012
 %   version 2: May 2013
+%Modified Code Author:
+%   Jia Zhixiang, Harbin Insistute of Technology
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear all;
@@ -15,9 +17,9 @@ clc;
 %% Read data
 
 % Depth = imread('.\data\Teddy\GroundTruth.png');
-Depth = pfmread('.\data\IC\depth0.pfm');
 % Depth = imresize(Depth,1/2,'nearest');
 % Color = imread('.\data\Teddy\Color.png');
+Depth = pfmread('.\data\IC\depth0.pfm');
 Color = imread('.\data\IC\colorImg0.bmp');
 % Color = imresize(Color,1/2,'nearest');
 % Depth = imread('.\data\synthetic\depth3.png');
@@ -44,7 +46,7 @@ Width = size(DepthSection,2);
 
 % Scaling Factor
 Interval = 5;             % Down-sample factor
-view_3d = 0;              % View the 3D depth or not
+view_3d = 1;              % View the 3D depth or not
 
 % BilateralFilter 
 BF_sigma_w = 3;      % range sigma
@@ -93,6 +95,12 @@ LBF_window = 10;
 LBF_depth_inteval = 50;          % Depth slice interal
 LBF_iterative_number = 3;
 
+% Fast Bilateral Solver
+
+
+
+%
+
 %% Generate the kinds of depth map
 SamplePoints = zeros(Height,Width);
 StartPoint = Interval; % It should be set to 'Interval' for the Joint Bilateral Upsample model to work
@@ -117,9 +125,9 @@ if(view_3d)
 end
 %% Choose models
 s = [struct('string','Bilateral Filter','run',false)
-     struct('string','Bilateral Upsampling','run',true)
+     struct('string','Bilateral Upsampling','run',false)
      struct('string','Noise-aware Filter','run',false)
-     struct('string','Weight Mode Filter','run',false)
+     struct('string','Weight Mode Filter','run',true)
      struct('string','Anisotropic Diffusion','run',true)
      struct('string','Original Markov Random Field','run',false)
      struct('string','Markov Random Field(Second Order Smoothness)','run',false)
@@ -157,6 +165,9 @@ if(isequal(s(i).string,'Bilateral Upsampling') && s(i).run)
 	fprintf([s(i).string ': total running time is %.5f s\n'],toc)
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   Fast Bilateral Solver       
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   Anisotropic Diffusion         

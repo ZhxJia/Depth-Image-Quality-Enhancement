@@ -13,6 +13,8 @@
 %Code Author:
 %   Liu Junyi, Zhejiang University
 %   Version 1: June 2013
+%Ref:
+%   Chan, D., et al. A noise-aware filter for real-time depth upsampling. 2008.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function result = NoiseAwareFilter(color,depth,factor,sigma_w,sigma_c,sigma_d,w,epsilon,tau)
     if( size(color,3) ~= 3 ),

@@ -16,6 +16,8 @@
 %Code Author:
 %   Liu Junyi, Zhejiang University
 %   Version 1: June 2013
+%Ref: Kopf, J., et al., Joint bilateral upsampling. ACM Transactions on Graphics, 2007. 
+%   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function result = JointBilateralUpsample(color,depth,factor,sigma_w,sigma_c,w)
     if( size(color,3) ~= 3 ),

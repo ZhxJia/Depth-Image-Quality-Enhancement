@@ -1,3 +1,25 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Function Name: Layered BilateralFilter
+%Aim: Use the bilateral filter to upsample the depth map
+%Output: 
+%   Result        -   The output depth map after bilateral filtering
+%Input: 
+%   color         -   Color image
+%   depth 		  -   Depth map
+%   sigma_w       -   Coefficient of gaussian kernel for spatial
+%   sigma_c       -   Coefficient of gaussian kernel for range
+%   w             -   Window size
+%   DepthInteval  -   
+%   IterativeTime -
+%Code Author:
+%   Liu Junyi, Zhejiang University
+%   Version 1: June 2012
+%   Version 2: May 2013
+%Ref:
+%   Yang, Q., et al. Spatial-depth super resolution for range images. 
+%                    Computer Vision and Pattern Recognition, 2007.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function Result = LayeredBilateralFilter(color,depth,sigma_w,sigma_c,w,DepthInteval,IterativeTime)
     %% Initialization
     L=10000;
