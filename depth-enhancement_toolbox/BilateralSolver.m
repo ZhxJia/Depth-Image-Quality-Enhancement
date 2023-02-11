@@ -37,16 +37,16 @@ methods(Access = public)
     
     function [Dn, Dm] = bistochastize(obj, maxiter)
         % Compute diagonal matrices to bistochastize a bilateral grid
-        m = obj.grid.splat(ones(1, obj.grid.npixels));
-        n = ones(1, obj.grid.nvertices);
+        m = obj.grid.splat(ones(obj.grid.npixels,1));
+        n = ones(obj.grid.nvertices,1);
         for i = 1:maxiter
-            n = sqrt(n*m/obj.grid.blur(n));
+            n = sqrt(n.*m./obj.grid.blur(n));
         end
         % Correct m to satisfy the assumption of bistochastization
         % regardless of how many iterations have been run.
-        m = n * obj.grid.blur(n);
-        Dm = diag(m);
-        Dn = diag(n);
+        m = n .* obj.grid.blur(n);
+        Dm = spdiags(m,0,length(m),length(m));
+        Dn = spdiags(n,0,length(n),length(n));
     end
     
     function [xhat, obj] = solve(obj, x, w)
@@ -54,18 +54,20 @@ methods(Access = public)
         assert(size(w,2) == 1);
         A_smooth = (obj.Dm - obj.Dn * obj.grid.blur(obj.Dn));
         w_splat = obj.grid.splat(w);
-        A_data = diag(w_splat(:,1));
+        A_data = spdiags(w_splat(:,1),0,length(w_splat),length(w_splat));
         A = obj.lam * A_smooth + A_data;
-        xw = x * w;
+        xw = x .* w;
         b = obj.grid.splat(xw);
         % Use simple Jacobi preconditioner
-%         A_diag = 
-        
+        A_diag = diag(A);
+        A_diag(A_diag < obj.A_diag_min) = obj.A_diag_min;
+        M = spdiags(1./A_diag,0,length(A_diag),length(A_diag));
         % Flat initialization
-        y0 = obj.grid.splat(xw) / w_splat;
+        y0 = obj.grid.splat(xw) ./ w_splat;
         yhat = zeros(size(y0));
-        for d = 1 : size(x,end)
-            yhat(:,d) = pcg(A, b(:,d), obj.cg_tol, obj.cg_maxiter);
+        s = size(x);
+        for d = 1 : s(end)
+            yhat(:,d) = pcg(A, b(:,d), obj.cg_tol, obj.cg_maxiter, M, [], y0(:,d));
         end
         xhat = obj.grid.slice(yhat);
     end

@@ -21,10 +21,13 @@ clc;
 % Color = imread('.\data\Teddy\Color.png');
 Depth = pfmread('.\data\IC\depth0.pfm');
 Color = imread('.\data\IC\colorImg0.bmp');
-Confidence = pfmread('.\data\IC\depth0.pfm');
+Confidence = pfmread('.\data\IC\reliability0.pfm');
 % Color = imresize(Color,1/2,'nearest');
 % Depth = imread('.\data\synthetic\depth3.png');
 % Color = imread('.\data\synthetic\color3.png');
+% Depth = imread('.\data\depth_superres\target.png');
+% Color = imread('.\data\depth_superres\reference.png');
+% Confidence = imread('.\data\depth_superres\confidence.png');
 
 %% Trim data if needed
 ColorSection = Color(766:2200, 1164:2562,:);
@@ -32,6 +35,7 @@ DepthSection = Depth(766:2200, 1164:2562);  % rgb2gray if needed
 ConfidenceSection = Confidence(766:2200, 1164:2562);
 % ColorSection = Color;
 % DepthSection = Depth;  % rgb2gray if needed
+% ConfidenceSection = Confidence;
 % for i = 1:150
 %     DepthSection(i,:) = i;
 % end
@@ -132,10 +136,10 @@ end
 %% Choose models
 s = [struct('string','Bilateral Filter','run',false)
      struct('string','Bilateral Upsampling','run',false)
-     struct('string','Bilateral Solver','run',false)
+     struct('string','Bilateral Solver','run',true)
      struct('string','Noise-aware Filter','run',false)
-     struct('string','Weight Mode Filter','run',true)
-     struct('string','Anisotropic Diffusion','run',true)
+     struct('string','Weight Mode Filter','run',false)
+     struct('string','Anisotropic Diffusion','run',false)
      struct('string','Original Markov Random Field','run',false)
      struct('string','Markov Random Field(Second Order Smoothness)','run',false)
      struct('string','Markov Random Field(Kernel Data Term)','run',false)
@@ -178,9 +182,14 @@ end
 if(isequal(s(i).string,'Bilateral Solver') && s(i).run)
 	fprintf([s(i).string ' begin...\n'])
     tic
-    grid = BilateralGrid(ColorSection, FBS_sigma_spatial,FBS_sigma_luma,FBS_sigma_chroma);
+%     r = im2double(ColorSection);
+    r = ColorSection;
+    grid = BilateralGrid(r, FBS_sigma_spatial,FBS_sigma_luma,FBS_sigma_chroma);
     fbs_solver = BilateralSolver(grid);
-    output = fbs_solver.solve(DepthSection,ConfidenceSection);
+    t = double(reshape(DepthSection,[],1))./(pow2(16)-1);
+    c = double(reshape(ConfidenceSection,[], 1))./(pow2(16)-1);
+    output = fbs_solver.solve(t,c);
+    Result = reshape(output, size(DepthSection));
 	fprintf([s(i).string ': total running time is %.5f s\n'],toc)
 end
 
