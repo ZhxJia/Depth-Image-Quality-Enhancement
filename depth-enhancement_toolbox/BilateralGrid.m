@@ -31,15 +31,15 @@ methods(Access = public)
         %   sigma_spatial - sample ratio of spatial
         %   sigma_luma - sample ratio of luma
         %   sima_chroma- sample ratio of chroma
-        im_yuv = rgb2ycbcr(im);
+        im_yuv = double(rgb2ycbcr(im));
         im_h = size(im_yuv,1);
         im_w = size(im_yuv,2);
         %compute 5-dimensional XYLUV bilateral-space coordinates
         [Ix, Iy] = meshgrid(1:im_w, 1:im_h);
-        x_coords = ceil(Ix / sigma_spatial);
-        y_coords = ceil(Iy / sigma_spatial);
-        luma_coords = ceil(im_yuv(:,:,1) / sigma_luma);
-        chroma_coords = ceil(im_yuv(:,:,2:3) / sigma_chroma);
+        x_coords = floor(Ix / sigma_spatial);
+        y_coords = floor(Iy / sigma_spatial);
+        luma_coords = floor(im_yuv(:,:,1) / sigma_luma);
+        chroma_coords = floor(im_yuv(:,:,2:3) / sigma_chroma);
         coords = cat(3, x_coords, y_coords, luma_coords, chroma_coords);
         coords_flat = double(reshape(coords,[],size(coords,3)));
         

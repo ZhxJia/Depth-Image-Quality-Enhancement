@@ -19,9 +19,10 @@ clc;
 % Depth = imread('.\data\Teddy\GroundTruth.png');
 % Depth = imresize(Depth,1/2,'nearest');
 % Color = imread('.\data\Teddy\Color.png');
-Depth = pfmread('.\data\IC\depth0.pfm');
-Color = imread('.\data\IC\colorImg0.bmp');
-Confidence = pfmread('.\data\IC\reliability0.pfm');
+Depth = pfmread('.\data\IC\depth.pfm');
+Color = imread('.\data\IC\colorImg.bmp');
+Confidence = imread('.\data\LED\maskImg0.bmp');
+% Confidence = pfmread('.\data\LED\reliability0.pfm');
 % Color = imresize(Color,1/2,'nearest');
 % Depth = imread('.\data\synthetic\depth3.png');
 % Color = imread('.\data\synthetic\color3.png');
@@ -30,9 +31,9 @@ Confidence = pfmread('.\data\IC\reliability0.pfm');
 % Confidence = imread('.\data\depth_superres\confidence.png');
 
 %% Trim data if needed
-ColorSection = Color(766:2200, 1164:2562,:);
-DepthSection = Depth(766:2200, 1164:2562);  % rgb2gray if needed
-ConfidenceSection = Confidence(766:2200, 1164:2562);
+ColorSection = Color(1240:1734, 1590:2100,:);
+DepthSection = Depth(1240:1734, 1590:2100,:);  % rgb2gray if needed
+ConfidenceSection = Confidence(1240:1734, 1590:2100,:);
 % ColorSection = Color;
 % DepthSection = Depth;  % rgb2gray if needed
 % ConfidenceSection = Confidence;
@@ -51,7 +52,7 @@ Width = size(DepthSection,2);
 %% Set Parameters
 
 % Scaling Factor
-Interval = 5;             % Down-sample factor
+Interval = 1;             % Down-sample factor
 view_3d = 1;              % View the 3D depth or not
 
 % BilateralFilter 
@@ -115,16 +116,17 @@ FBS_cg_maxiter = 25;
 SamplePoints = zeros(Height,Width);
 StartPoint = Interval; % It should be set to 'Interval' for the Joint Bilateral Upsample model to work
 SamplePoints(StartPoint:Interval:end,StartPoint:Interval:end) = 1;                 
-SampleDepth = SamplePoints.*double(DepthSection);
+% SampleDepth = SamplePoints.*double(DepthSection);
+SampleDepth = double(DepthSection);
 LowResDepth = DepthSection(StartPoint:Interval:end,StartPoint:Interval:end);      %Sample the low resolution Depth Map
 HighResDepth = double(imresize(LowResDepth,size(DepthSection)));                  %Interpolating to the Normal size
 
 %% Show the ground truth and input data
 figure;
 subplot(2,2,1);imshow(uint8(ColorSection));title('Color Image');axis off
-subplot(2,2,2);imshow(DepthSection,[0 255]);title('Ground Truth');axis off
-subplot(2,2,3);imshow(SampleDepth,[0 255]);title('Downsampled Depth Map');axis off
-subplot(2,2,4);imshow(HighResDepth,[0 255]);title('Upsampled Depth Map(Interpolation)');axis off
+subplot(2,2,2);imagesc(DepthSection);title('Ground Truth');axis off
+subplot(2,2,3);imagesc(SampleDepth);title('Downsampled Depth Map');axis off
+subplot(2,2,4);imagesc(HighResDepth);title('Upsampled Depth Map(Interpolation)');axis off
 if(view_3d)
     [mu,mv] = meshgrid(1:Width,1:Height);
     figure;
@@ -134,15 +136,15 @@ if(view_3d)
     light('Posi',[1,0,1]);shading interp;axis off;set(gcf,'color',[0 0 0]);
 end
 %% Choose models
-s = [struct('string','Bilateral Filter','run',false)
+s = [struct('string','Bilateral Filter','run',true)
      struct('string','Bilateral Upsampling','run',false)
      struct('string','Bilateral Solver','run',true)
-     struct('string','Noise-aware Filter','run',false)
+     struct('string','Noise-aware Filter','run',true)
      struct('string','Weight Mode Filter','run',false)
-     struct('string','Anisotropic Diffusion','run',false)
+     struct('string','Anisotropic Diffusion','run',true)
      struct('string','Original Markov Random Field','run',false)
-     struct('string','Markov Random Field(Second Order Smoothness)','run',false)
-     struct('string','Markov Random Field(Kernel Data Term)','run',false)
+     struct('string','Markov Random Field(Second Order Smoothness)','run',true)
+     struct('string','Markov Random Field(Kernel Data Term)','run',true)
      struct('string','Markov Random Field(Tensor)','run',false)
      struct('string','Layered Bilateral Filter','run',false)
     ];
@@ -172,7 +174,7 @@ end
 if(isequal(s(i).string,'Bilateral Upsampling') && s(i).run)
 	fprintf([s(i).string ' begin...\n'])
     tic
-    Result = JointBilateralUpsample(ColorSection,LowResDepth,Interval,BU_sigma_w,BU_sigma_c,BU_window);
+    Result = JointBilateralUpsample(ColorSection,DepthSection,Interval,BU_sigma_w,BU_sigma_c,BU_window);
 	fprintf([s(i).string ': total running time is %.5f s\n'],toc)
 end
 
@@ -186,8 +188,8 @@ if(isequal(s(i).string,'Bilateral Solver') && s(i).run)
     r = ColorSection;
     grid = BilateralGrid(r, FBS_sigma_spatial,FBS_sigma_luma,FBS_sigma_chroma);
     fbs_solver = BilateralSolver(grid);
-    t = double(reshape(DepthSection,[],1))./(pow2(16)-1);
-    c = double(reshape(ConfidenceSection,[], 1))./(pow2(16)-1);
+    t = double(reshape(DepthSection,[],1));
+    c = double(reshape(ConfidenceSection,[], 1));
     output = fbs_solver.solve(t,c);
     Result = reshape(output, size(DepthSection));
 	fprintf([s(i).string ': total running time is %.5f s\n'],toc)
@@ -209,7 +211,7 @@ end
 if(isequal(s(i).string,'Noise-aware Filter') && s(i).run)
 	fprintf([s(i).string ' begin...\n'])
     tic
-    Result = NoiseAwareFilter(ColorSection,LowResDepth,Interval,BU_sigma_w,BU_sigma_c,NAU_sigma_d,BU_window);
+    Result = NoiseAwareFilter(ColorSection,DepthSection,Interval,BU_sigma_w,BU_sigma_c,NAU_sigma_d,BU_window);
 	fprintf([s(i).string ': total running time is %.5f s\n'],toc)
 end
 
@@ -280,9 +282,9 @@ end
 %% Show results
 if(s(i).run)
 figure;
-imshow(uint8(Result),[0 255]);axis off
+imagesc(Result);axis off
 title(s(i).string)
-imwrite(uint8(Result),['./result/' s(i).string '.png'],'png')
+% imwrite(Result,['./result/' s(i).string '.png'],'png')
 pfmwrite(Result, ['./result/' s(i).string '.pfm'], -1);
 end
 %% Quantative evaluation
